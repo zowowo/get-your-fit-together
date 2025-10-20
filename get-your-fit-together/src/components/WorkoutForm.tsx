@@ -147,9 +147,9 @@ export default function WorkoutForm({ initialValues, workoutId }: Props) {
           onChange={onChange}
           className="mt-1 w-full border rounded px-3 py-2"
         >
-          <option value="easy">easy</option>
-          <option value="medium">medium</option>
-          <option value="hard">hard</option>
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
         </select>
       </div>
 
