@@ -5,9 +5,26 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
+import FavoriteButton from "@/components/FavoriteButton";
 import { Loader2 } from "lucide-react";
 
 type Workout = {
@@ -51,31 +68,34 @@ export default function WorkoutList() {
     load();
   }, []);
 
-  if (loading) return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex items-center justify-center p-12">
-        <Loader2 className="h-8 w-8 animate-spin text-cyan-600" />
+  if (loading)
+    return (
+      <div className="max-w-3xl mx-auto">
+        <div className="flex items-center justify-center p-12">
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-600" />
+        </div>
       </div>
-    </div>
-  );
-  if (err) return (
-    <div className="max-w-3xl mx-auto">
-      <div className="p-4 text-red-400 bg-red-950/50 rounded-lg border border-red-800/50">
-        {err}
+    );
+  if (err)
+    return (
+      <div className="max-w-3xl mx-auto">
+        <div className="p-4 text-red-400 bg-red-950/50 rounded-lg border border-red-800/50">
+          {err}
+        </div>
       </div>
-    </div>
-  );
-  
-  if (workouts.length === 0) return (
-    <div className="max-w-3xl mx-auto">
-      <div className="text-center p-12 rounded-lg border border-slate-800 bg-slate-900/50">
-        <p className="text-slate-400">No workouts found</p>
-        <Button asChild className="mt-4 bg-cyan-600 hover:bg-cyan-500">
-          <Link href="/workouts/new">Create your first workout</Link>
-        </Button>
+    );
+
+  if (workouts.length === 0)
+    return (
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center p-12 rounded-lg border border-slate-800 bg-slate-900/50">
+          <p className="text-slate-400">No workouts found</p>
+          <Button asChild className="mt-4 bg-cyan-600 hover:bg-cyan-500">
+            <Link href="/workouts/new">Create your first workout</Link>
+          </Button>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="max-w-3xl mx-auto space-y-3">
@@ -94,8 +114,8 @@ export default function WorkoutList() {
                 <h3 className="text-lg font-medium text-slate-100 truncate">
                   {w.title}
                 </h3>
-                <Badge 
-                  variant={w.is_public ? "default" : "secondary"} 
+                <Badge
+                  variant={w.is_public ? "default" : "secondary"}
                   className="bg-cyan-600 hover:bg-cyan-500"
                 >
                   {w.is_public ? "Public" : "Private"}
@@ -103,16 +123,27 @@ export default function WorkoutList() {
               </div>
               <p className="text-sm text-slate-400 mt-1">{ownerName}</p>
               {w.description && (
-                <p className="text-sm text-slate-300 mt-2 line-clamp-2">{w.description}</p>
+                <p className="text-sm text-slate-300 mt-2 line-clamp-2">
+                  {w.description}
+                </p>
               )}
             </div>
             <div className="flex items-center gap-3 ml-4">
-              <Button variant="ghost" asChild className="text-slate-300 hover:text-cyan-400 hover:bg-slate-800">
+              <Button
+                variant="ghost"
+                asChild
+                className="text-slate-300 hover:text-cyan-400 hover:bg-slate-800"
+              >
                 <Link href={`/workouts/${w.id}`}>View details</Link>
               </Button>
+              {user && <FavoriteButton workoutId={w.id} />}
               {mine && (
                 <>
-                  <Button variant="ghost" asChild className="text-slate-300 hover:text-cyan-400 hover:bg-slate-800">
+                  <Button
+                    variant="ghost"
+                    asChild
+                    className="text-slate-300 hover:text-cyan-400 hover:bg-slate-800"
+                  >
                     <Link href={`/workouts/${w.id}/edit`}>Edit</Link>
                   </Button>
                   <DeleteButton id={w.id} />
@@ -158,9 +189,12 @@ function DeleteButton({ id }: { id: string }) {
       </AlertDialogTrigger>
       <AlertDialogContent className="bg-slate-800 border-slate-700">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-slate-100">Delete Workout</AlertDialogTitle>
+          <AlertDialogTitle className="text-slate-100">
+            Delete Workout
+          </AlertDialogTitle>
           <AlertDialogDescription className="text-slate-400">
-            Are you sure you want to delete this workout? This action cannot be undone.
+            Are you sure you want to delete this workout? This action cannot be
+            undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -175,9 +209,7 @@ function DeleteButton({ id }: { id: string }) {
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
-        {err && (
-          <p className="text-red-400 text-sm mt-2">{err}</p>
-        )}
+        {err && <p className="text-red-400 text-sm mt-2">{err}</p>}
       </AlertDialogContent>
     </AlertDialog>
   );

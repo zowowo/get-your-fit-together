@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/auth-context";
 import ExerciseList from "@/components/ExerciseList";
 import ExerciseForm from "@/components/ExerciseForm";
+import FavoriteButton from "@/components/FavoriteButton";
+import { Button } from "@/components/ui/button";
 
 type Workout = {
   id: string;
@@ -63,20 +66,22 @@ export default function WorkoutDetailsPage() {
             <div className="border rounded-lg p-6 space-y-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold">{workout.title}</h2>
-                  <div className="text-sm text-gray-600 mt-1">
+                  <h2 className="text-2xl font-bold text-slate-100">{workout.title}</h2>
+                  <div className="text-sm text-slate-400 mt-1">
                     By {workout.owner_profile?.full_name ?? "Unknown user"}{" "}
                     {workout.is_public ? "• Public" : "• Private"}
                   </div>
                 </div>
-                {canEdit && (
-                  <a
-                    href={`/workouts/${workout.id}/edit`}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-                  >
-                    Edit Workout
-                  </a>
-                )}
+                <div className="flex items-center gap-3">
+                  {user && <FavoriteButton workoutId={workout.id} />}
+                  {canEdit && (
+                    <Button asChild variant="default" className="bg-cyan-600 hover:bg-cyan-500">
+                      <Link href={`/workouts/${workout.id}/edit`}>
+                        Edit Workout
+                      </Link>
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {workout.description && (
