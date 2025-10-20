@@ -39,8 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
       setLoading(false);
 
-      // Create profile on signup
-      if (event === "SIGNED_IN" && session?.user && !user) {
+      // Ensure profile exists/updated on every sign-in
+      if (event === "SIGNED_IN" && session?.user) {
         await createProfile(session.user);
       }
     });
@@ -70,22 +70,40 @@ export const useAuth = () => {
   return context;
 };
 
-// Helper function to create profile
+// Helper function to create or update profile with best-effort full_name
 async function createProfile(user: User) {
   try {
+    const provider = (user.app_metadata as any)?.provider as string | undefined;
+    const meta = user.user_metadata as any;
+
+    // Prefer provider full_name; fallback to signup-provided full_name; finally fallback to email local-part
+    const derivedFullName =
+      meta?.full_name ||
+      meta?.name ||
+      (typeof user.email === "string" ? user.email.split("@")[0] : null);
+
+    console.log("Creating/updating profile for user:", {
+      id: user.id,
+      email: user.email,
+      provider,
+      user_metadata: meta,
+      derivedFullName,
+    });
+
     const { error } = await supabase
       .from("profiles")
-      .insert({
+      .upsert({
         id: user.id,
-        full_name: user.user_metadata?.full_name || null,
-        avatar_url: user.user_metadata?.avatar_url || null,
+        full_name: derivedFullName ?? null,
+        avatar_url: meta?.avatar_url || meta?.picture || null,
       })
-      .select()
+      .select("id, full_name")
       .single();
 
-    if (error && error.code !== "23505") {
-      // Ignore duplicate key error
-      console.error("Error creating profile:", error);
+    if (error) {
+      console.error("Error upserting profile:", error);
+    } else {
+      console.log("Profile upserted successfully");
     }
   } catch (error) {
     console.error("Error creating profile:", error);
