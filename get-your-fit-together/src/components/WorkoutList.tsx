@@ -51,15 +51,15 @@ export default function WorkoutList() {
 
         if (error) throw error;
         if (!data) throw new Error("No data returned from workouts query");
-        
+
         // Transform the data to match our types
-        const workoutsData = data.map(w => ({
+        const workoutsData = data.map((w) => ({
           ...w,
-          owner_profile: {
-            full_name: w.owner_profile?.full_name ?? null
-          }
+          owner_profile: Array.isArray(w.owner_profile)
+            ? w.owner_profile[0] || { full_name: null }
+            : w.owner_profile ?? { full_name: null },
         }));
-        
+
         setWorkouts(workoutsData);
       } catch (e: unknown) {
         const error = e as Error;

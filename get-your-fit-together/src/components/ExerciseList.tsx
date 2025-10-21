@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { useAuth } from "@/lib/auth-context";
 import ExerciseForm from "@/components/ExerciseForm";
 
 type Exercise = {
@@ -21,7 +20,6 @@ type Props = {
 };
 
 export default function ExerciseList({ workoutId, canEdit = false }: Props) {
-  const { user } = useAuth();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -68,26 +66,25 @@ export default function ExerciseList({ workoutId, canEdit = false }: Props) {
     }
   };
 
-  const handleRefresh = () => {
-    // Trigger reload by updating workoutId dependency
+  const handleRefresh = async () => {
     setLoading(true);
     setErr(null);
-    supabase
-      .from("exercises")
-      .select("*")
-      .eq("workout_id", workoutId)
-      .order("created_at", { ascending: true })
-      .then(({ data, error }) => {
-        if (error) throw error;
-        setExercises(data ?? []);
-      })
-      .catch((e: unknown) => {
-        const error = e as Error;
-        setErr(error?.message ?? "Failed to load exercises");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+
+    try {
+      const { data, error } = await supabase
+        .from("exercises")
+        .select("*")
+        .eq("workout_id", workoutId)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+      setExercises(data ?? []);
+    } catch (e: unknown) {
+      const error = e as Error;
+      setErr(error?.message ?? "Failed to load exercises");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) return <div className="text-gray-600">Loading exercises...</div>;

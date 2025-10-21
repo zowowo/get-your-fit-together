@@ -1,0 +1,48 @@
+[1mdiff --git a/get-your-fit-together/src/components/ExerciseList.tsx b/get-your-fit-together/src/components/ExerciseList.tsx[m
+[1mindex 0357334..bf10e80 100644[m
+[1m--- a/get-your-fit-together/src/components/ExerciseList.tsx[m
+[1m+++ b/get-your-fit-together/src/components/ExerciseList.tsx[m
+[36m@@ -68,26 +68,25 @@[m [mexport default function ExerciseList({ workoutId, canEdit = false }: Props) {[m
+     }[m
+   };[m
+ [m
+[31m-  const handleRefresh = () => {[m
+[31m-    // Trigger reload by updating workoutId dependency[m
+[32m+[m[32m  const handleRefresh = async () => {[m
+     setLoading(true);[m
+     setErr(null);[m
+[31m-    supabase[m
+[31m-      .from("exercises")[m
+[31m-      .select("*")[m
+[31m-      .eq("workout_id", workoutId)[m
+[31m-      .order("created_at", { ascending: true })[m
+[31m-      .then(({ data, error }) => {[m
+[31m-        if (error) throw error;[m
+[31m-        setExercises(data ?? []);[m
+[31m-      })[m
+[31m-      .catch((e: unknown) => {[m
+[31m-        const error = e as Error;[m
+[31m-        setErr(error?.message ?? "Failed to load exercises");[m
+[31m-      })[m
+[31m-      .finally(() => {[m
+[31m-        setLoading(false);[m
+[31m-      });[m
+[32m+[m
+[32m+[m[32m    try {[m
+[32m+[m[32m      const { data, error } = await supabase[m
+[32m+[m[32m        .from("exercises")[m
+[32m+[m[32m        .select("*")[m
+[32m+[m[32m        .eq("workout_id", workoutId)[m
+[32m+[m[32m        .order("created_at", { ascending: true });[m
+[32m+[m
+[32m+[m[32m      if (error) throw error;[m
+[32m+[m[32m      setExercises(data ?? []);[m
+[32m+[m[32m    } catch (e: unknown) {[m
+[32m+[m[32m      const error = e as Error;[m
+[32m+[m[32m      setErr(error?.message ?? "Failed to load exercises");[m
+[32m+[m[32m    } finally {[m
+[32m+[m[32m      setLoading(false);[m
+[32m+[m[32m    }[m
+   };[m
+ [m
+   if (loading) return <div className="text-gray-600">Loading exercises...</div>;[m

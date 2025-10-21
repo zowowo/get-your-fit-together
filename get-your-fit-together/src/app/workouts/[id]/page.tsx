@@ -43,8 +43,10 @@ export default function WorkoutDetailsPage() {
         const workoutData: Workout = {
           ...data,
           owner_profile: {
-            full_name: data.owner_profile?.full_name ?? null
-          }
+            full_name:
+              (data.owner_profile as { full_name: string | null }[] | null)?.[0]
+                ?.full_name ?? null,
+          },
         };
         setWorkout(workoutData);
       } else {
