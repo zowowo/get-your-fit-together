@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/auth-context";
+import ExerciseForm from "@/components/ExerciseForm";
 
 type Exercise = {
   id: string;
@@ -38,8 +39,9 @@ export default function ExerciseList({ workoutId, canEdit = false }: Props) {
 
         if (error) throw error;
         setExercises(data ?? []);
-      } catch (e: any) {
-        setErr(e.message ?? "Failed to load exercises");
+      } catch (e: unknown) {
+        const error = e as Error;
+        setErr(error?.message ?? "Failed to load exercises");
       } finally {
         setLoading(false);
       }
@@ -60,8 +62,9 @@ export default function ExerciseList({ workoutId, canEdit = false }: Props) {
 
       // Remove from local state
       setExercises(exercises.filter((ex) => ex.id !== exerciseId));
-    } catch (e: any) {
-      setErr(e.message ?? "Failed to delete exercise");
+    } catch (e: unknown) {
+      const error = e as Error;
+      setErr(error?.message ?? "Failed to delete exercise");
     }
   };
 
@@ -78,8 +81,9 @@ export default function ExerciseList({ workoutId, canEdit = false }: Props) {
         if (error) throw error;
         setExercises(data ?? []);
       })
-      .catch((e: any) => {
-        setErr(e.message ?? "Failed to load exercises");
+      .catch((e: unknown) => {
+        const error = e as Error;
+        setErr(error?.message ?? "Failed to load exercises");
       })
       .finally(() => {
         setLoading(false);

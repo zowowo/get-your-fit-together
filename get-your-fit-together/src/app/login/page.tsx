@@ -50,8 +50,9 @@ export default function LoginPage() {
         if (error) throw error;
         router.push("/");
       }
-    } catch (error: any) {
-      setMessage(error.message);
+    } catch (error: unknown) {
+      const err = error as Error;
+      setMessage(err?.message ?? "An error occurred");
     } finally {
       setLoading(false);
     }

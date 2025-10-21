@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { z } from "zod";
 import { workoutSchema, WorkoutInput } from "@/lib/validators";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/auth-context";
@@ -12,25 +11,29 @@ type Props = {
   workoutId?: string; // present for edit
 };
 
+type FormEvent = React.ChangeEvent<
+  HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+>;
+
 export default function WorkoutForm({ initialValues, workoutId }: Props) {
   const { user } = useAuth();
   const router = useRouter();
   const [values, setValues] = useState<WorkoutInput>({
     title: initialValues?.title ?? "",
     description: initialValues?.description ?? "",
-    difficulty: (initialValues?.difficulty as any) ?? "medium",
+    difficulty: initialValues?.difficulty ?? "medium",
     is_public: initialValues?.is_public ?? false,
   });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const onChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value, type, checked } = e.target as any;
-    setValues((v) => ({ ...v, [name]: type === "checkbox" ? checked : value }));
+  const onChange = (e: FormEvent) => {
+    const { name, value, type } = e.target;
+    setValues((v) => ({
+      ...v,
+      [name]:
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+    }));
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -107,9 +110,10 @@ export default function WorkoutForm({ initialValues, workoutId }: Props) {
       console.timeEnd(timeLabel);
       router.push("/workouts");
       router.refresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Workout save failed:", err);
-      setError(err?.message ?? "Something went wrong");
+      const error = err as Error;
+      setError(error?.message ?? "Something went wrong");
     } finally {
       setSubmitting(false);
     }

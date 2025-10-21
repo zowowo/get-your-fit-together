@@ -5,13 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -56,10 +50,20 @@ export default function WorkoutList() {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        console.log("Workouts data:", data);
-        setWorkouts((data as any) ?? []);
-      } catch (e: any) {
-        setErr(e.message ?? "Failed to load workouts");
+        if (!data) throw new Error("No data returned from workouts query");
+        
+        // Transform the data to match our types
+        const workoutsData = data.map(w => ({
+          ...w,
+          owner_profile: {
+            full_name: w.owner_profile?.full_name ?? null
+          }
+        }));
+        
+        setWorkouts(workoutsData);
+      } catch (e: unknown) {
+        const error = e as Error;
+        setErr(error?.message ?? "Failed to load workouts");
       } finally {
         setLoading(false);
       }

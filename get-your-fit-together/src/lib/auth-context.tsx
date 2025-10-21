@@ -73,8 +73,8 @@ export const useAuth = () => {
 // Helper function to create or update profile with best-effort full_name
 async function createProfile(user: User) {
   try {
-    const provider = (user.app_metadata as any)?.provider as string | undefined;
-    const meta = user.user_metadata as any;
+    const provider = user.app_metadata?.provider as string | undefined;
+    const meta = user.user_metadata;
 
     // Prefer provider full_name; fallback to signup-provided full_name; finally fallback to email local-part
     const derivedFullName =

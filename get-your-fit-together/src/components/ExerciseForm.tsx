@@ -32,10 +32,10 @@ export default function ExerciseForm({
   const onChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, type } = e.target as any;
+    const { name, value, type } = e.target;
     setValues((v) => ({
       ...v,
-      [name]: type === "number" ? (value ? parseInt(value) : null) : value,
+      [name]: type === "number" ? (value ? parseInt(value, 10) : null) : value,
     }));
   };
 
@@ -96,9 +96,10 @@ export default function ExerciseForm({
       }
 
       onSuccess?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Exercise save failed:", err);
-      setError(err?.message ?? "Something went wrong");
+      const error = err as Error;
+      setError(error?.message ?? "Something went wrong");
     } finally {
       setSubmitting(false);
     }
