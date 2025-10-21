@@ -22,9 +22,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import FavoriteButton from "@/components/FavoriteButton";
 import { Loader2 } from "lucide-react";
 
 type Workout = {
@@ -136,7 +135,6 @@ export default function WorkoutList() {
               >
                 <Link href={`/workouts/${w.id}`}>View details</Link>
               </Button>
-              {user && <FavoriteButton workoutId={w.id} />}
               {mine && (
                 <>
                   <Button
