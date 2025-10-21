@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { handleSupabaseError, handleSuccess } from "@/lib/error-handler";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -63,6 +64,7 @@ export default function WorkoutList() {
         setWorkouts(workoutsData);
       } catch (e: unknown) {
         const error = e as Error;
+        handleSupabaseError(error, "Failed to load workouts");
         setErr(error?.message ?? "Failed to load workouts");
       } finally {
         setLoading(false);
@@ -169,9 +171,11 @@ function DeleteButton({ id }: { id: string }) {
     try {
       const { error } = await supabase.from("workouts").delete().eq("id", id);
       if (error) throw error;
+      handleSuccess("Workout deleted successfully!");
       location.reload();
     } catch (e: unknown) {
       const error = e as Error;
+      handleSupabaseError(error, "Failed to delete workout");
       setErr(error?.message ?? "Failed to delete");
     } finally {
       setBusy(false);

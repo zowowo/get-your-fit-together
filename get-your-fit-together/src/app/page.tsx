@@ -42,7 +42,7 @@ function HomeContent() {
                 Welcome to your fitness journey!
               </h2>
               <p className="text-gray-600">
-                Start tracking your workouts and achieving your fitness goals.
+                Start tracking your workouts. Get your fit together.
               </p>
               <div className="mt-6">
                 <Link

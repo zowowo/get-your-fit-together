@@ -40,15 +40,27 @@ export default function WorkoutDetailsPage() {
         .single();
       if (error) setErr(error.message);
       if (data) {
-        const workoutData: Workout = {
-          ...data,
+        const workoutData = data as {
+          id: string;
+          title: string;
+          description: string | null;
+          difficulty: string | null;
+          is_public: boolean;
+          owner: string;
+          owner_profile: { full_name: string | null }[] | null;
+        };
+        const workout: Workout = {
+          id: workoutData.id,
+          title: workoutData.title,
+          description: workoutData.description,
+          difficulty: workoutData.difficulty,
+          is_public: workoutData.is_public,
+          owner: workoutData.owner,
           owner_profile: {
-            full_name:
-              (data.owner_profile as { full_name: string | null }[] | null)?.[0]
-                ?.full_name ?? null,
+            full_name: workoutData.owner_profile?.[0]?.full_name ?? null,
           },
         };
-        setWorkout(workoutData);
+        setWorkout(workout);
       } else {
         setWorkout(null);
       }
