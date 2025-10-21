@@ -170,8 +170,9 @@ function DeleteButton({ id }: { id: string }) {
       const { error } = await supabase.from("workouts").delete().eq("id", id);
       if (error) throw error;
       location.reload();
-    } catch (e: any) {
-      setErr(e.message ?? "Failed to delete");
+    } catch (e: unknown) {
+      const error = e as Error;
+      setErr(error?.message ?? "Failed to delete");
     } finally {
       setBusy(false);
     }

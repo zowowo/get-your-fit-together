@@ -15,7 +15,7 @@ type Workout = {
   difficulty: string | null;
   is_public: boolean;
   owner: string;
-  owner_profile?: { full_name: string | null } | null;
+  owner_profile: { full_name: string | null };
 };
 
 export default function WorkoutDetailsPage() {
@@ -39,7 +39,17 @@ export default function WorkoutDetailsPage() {
         .eq("id", workoutId)
         .single();
       if (error) setErr(error.message);
-      setWorkout((data as any) ?? null);
+      if (data) {
+        const workoutData: Workout = {
+          ...data,
+          owner_profile: {
+            full_name: data.owner_profile?.full_name ?? null
+          }
+        };
+        setWorkout(workoutData);
+      } else {
+        setWorkout(null);
+      }
       setLoading(false);
     })();
   }, [workoutId]);
