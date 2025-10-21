@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/auth-context";
 import ExerciseList from "@/components/ExerciseList";
 import ExerciseForm from "@/components/ExerciseForm";
+import FavoriteButton from "@/components/FavoriteButton";
 
 type Workout = {
   id: string;
@@ -93,14 +94,22 @@ export default function WorkoutDetailsPage() {
                     {workout.is_public ? "• Public" : "• Private"}
                   </div>
                 </div>
-                {canEdit && (
-                  <a
-                    href={`/workouts/${workout.id}/edit`}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-                  >
-                    Edit Workout
-                  </a>
-                )}
+                <div className="flex items-center gap-3">
+                  {/* Add Favorite Button */}
+                  <FavoriteButton
+                    workoutId={workout.id}
+                    size="md"
+                    showText={true}
+                  />
+                  {canEdit && (
+                    <a
+                      href={`/workouts/${workout.id}/edit`}
+                      className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                    >
+                      Edit Workout
+                    </a>
+                  )}
+                </div>
               </div>
 
               {workout.description && (

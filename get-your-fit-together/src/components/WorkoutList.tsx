@@ -20,6 +20,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
+import FavoriteButton from "@/components/FavoriteButton";
 
 type Workout = {
   id: string;
@@ -134,6 +135,9 @@ export default function WorkoutList() {
               )}
             </div>
             <div className="flex items-center gap-3 ml-4">
+              {/* Add Favorite Button */}
+              <FavoriteButton workoutId={w.id} size="sm" />
+
               <Button
                 variant="ghost"
                 asChild

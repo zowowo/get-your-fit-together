@@ -58,7 +58,7 @@ export default function WorkoutForm({ initialValues, workoutId }: Props) {
 
         if (error) throw error;
         handleSuccess("Workout updated successfully!");
-        router.push(`/workouts/${workoutId}`);
+        router.push(`/dashboard/workouts/${workoutId}`);
       } else {
         // Create new workout
         const { error } = await supabase.from("workouts").insert({
@@ -71,7 +71,7 @@ export default function WorkoutForm({ initialValues, workoutId }: Props) {
 
         if (error) throw error;
         handleSuccess("Workout created successfully!");
-        router.push("/workouts");
+        router.push("/dashboard");
       }
     } catch (err: unknown) {
       handleSupabaseError(err, "Failed to save workout");

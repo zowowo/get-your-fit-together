@@ -38,6 +38,26 @@ export type Database = {
           created_at?: string | null
         }
       }
+      favorites: {
+        Row: {
+          id: string
+          user_id: string
+          workout_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          workout_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          workout_id?: string
+          created_at?: string
+        }
+      }
       profiles: {
         Row: {
           id: string
