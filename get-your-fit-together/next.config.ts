@@ -1,8 +1,15 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   output: 'standalone',
-  distDir: '.next'
-};
-
-export default nextConfig;
+  distDir: '.next',
+  async rewrites() {
+    return {
+      fallback: [
+        {
+          source: '/:path*',
+          destination: '/_not-found',
+        },
+      ],
+    }
+  },
+}
