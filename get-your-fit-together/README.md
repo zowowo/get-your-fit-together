@@ -34,25 +34,28 @@ erDiagram
     users ||--o{ favorites : "M:N"
     workouts ||--o{ favorites : "M:N"
 ```
+
 ---
 
 ## 📂 Local Setup
+
 ### 1️⃣ Prerequisites
 
 Make sure you have the following installed:
 
 - **Node.js
- v18** or later
+  v18** or later
 
 - **Supabase**
- project (free tier)
+  project (free tier)
 
 - **Vercel** CLI
- (optional, for deployment)
+  (optional, for deployment)
 
 - **Git**
 
 ### 2️⃣ Clone and Install
+
 ```
 git clone https://github.com/zowowo/get-your-fit-together.git
 cd get-your-fit-together
@@ -87,41 +90,43 @@ This will create:
 - Favorites (M:N)
 
 ### 5️⃣ Run the Development Server
+
 ```
 npm run dev
 ```
 
 Visit http://localhost:3000 to see your app running locally.
 
-
-
 ## 🧭 Navigation & Access Control
 
-| Route | Description | Auth Required |
-| -------- | -------- | -------- |
-| /        | Public Home (Explore Workouts)  | ❌  |
-| /dashboard | Authentication pages | ✅  |
-| /dashboard | User's workout list (CRUD)  | ✅  |
-| /dashboard/workouts/[id] | Workout details + exercises | ✅  |
-| /dashboard/favorites |List of favorited workouts| ✅  |
-| /dashboard/profile | User profile (1:1) | ✅  |
+| Route                    | Description                    | Auth Required |
+| ------------------------ | ------------------------------ | ------------- |
+| /                        | Public Home (Explore Workouts) | ❌            |
+| /login, signup           | Authentication pages           | ❌            |
+| /dashboard               | User's workout list (CRUD)     | ✅            |
+| /dashboard/workouts/[id] | Workout details + exercises    | ✅            |
+| /dashboard/favorites     | List of favorited workouts     | ✅            |
+| /dashboard/profile       | User profile (1:1)             | ✅            |
 
 ### 🔒 Protected Routes:
+
 If a user is **not logged in** and tries to access a protected route, they are **redirected** to /login.
 
 ## ✅ Feature Mapping
-| Requirement | Implementation | 
-| -------- | -------- | 
-| Authentication | ✅ Supabase Auth (Email + Password)|
-| CRUD (Workouts + Exercises) |✅ Create, Edit, Delete|
-| 1:1 Relationship | ✅ users ↔ profiles|
-| 1:N Relationship | ✅ workouts ↔ exercises|
-| M:N Relationship | ✅ favorites, user_workouts|
-| Access Control | ✅ AuthGuard + redirects|
-| Responsive Design | ✅ Tailwind CSS, Shadcn, MaterialUI|
-| Seed Data | ✅ supabase/seed.sql|
+
+| Requirement                 | Implementation                      |
+| --------------------------- | ----------------------------------- |
+| Authentication              | ✅ Supabase Auth (Email + Password) |
+| CRUD (Workouts + Exercises) | ✅ Create, Edit, Delete             |
+| 1:1 Relationship            | ✅ users ↔ profiles                 |
+| 1:N Relationship            | ✅ workouts ↔ exercises             |
+| M:N Relationship            | ✅ favorites, user_workouts         |
+| Access Control              | ✅ AuthGuard + redirects            |
+| Responsive Design           | ✅ Tailwind CSS, Shadcn, MaterialUI |
+| Seed Data                   | ✅ supabase/seed.sql                |
 
 ## SDLC Notes
+
 This project followed an incremental development lifecycle:
 
 1. Plan — Defined entities and relationships in Supabase schema.
@@ -137,8 +142,9 @@ This project followed an incremental development lifecycle:
 This approach ensures every rubric requirement is verifiable step-by-step
 
 ## 🧰 AI Tools Used
-| Tool | Purpose | 
-| -------- | -------- | 
-| ChatGPT (GPT-5), Claude Sonnet 3.5 | Schema design, documentation, seed data generation|
-| Cursor, Microsoft Copilot  |Code navigation and Next.js routing scaffolding|
-| Windsurf, Uizard | Frontend prototyping and layout testing|
+
+| Tool                               | Purpose                                            |
+| ---------------------------------- | -------------------------------------------------- |
+| ChatGPT (GPT-5), Claude Sonnet 3.5 | Schema design, documentation, seed data generation |
+| Cursor, Microsoft Copilot          | Code navigation and Next.js routing scaffolding    |
+| Windsurf, Uizard                   | Frontend prototyping and layout testing            |
