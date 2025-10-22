@@ -139,7 +139,6 @@ This approach ensures every rubric requirement is verifiable step-by-step
 ## 🧰 AI Tools Used
 | Tool | Purpose | 
 | -------- | -------- | 
-| ChatGPT (GPT-5) | Schema design, documentation, seed data generation|
-| Cursor |Code navigation and Next.js routing scaffolding|
-| Supabase MCP | Database migrations and schema validation|
+| ChatGPT (GPT-5), Claude Sonnet 3.5 | Schema design, documentation, seed data generation|
+| Cursor, Microsoft Copilot  |Code navigation and Next.js routing scaffolding|
 | Windsurf, Uizard | Frontend prototyping and layout testing|
