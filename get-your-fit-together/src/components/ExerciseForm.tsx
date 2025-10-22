@@ -6,12 +6,16 @@ import { exerciseSchema, ExerciseInput } from "@/lib/validators";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/auth-context";
 import { handleSupabaseError, handleSuccess } from "@/lib/error-handler";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type Props = {
   workoutId: string;
   initialValues?: Partial<ExerciseInput & { id: string }>;
   exerciseId?: string; // present for edit
   onSuccess?: () => void;
+  onCancel?: () => void; // for cancel button
+  showHeading?: boolean; // whether to show the internal heading
 };
 
 export default function ExerciseForm({
@@ -19,6 +23,8 @@ export default function ExerciseForm({
   initialValues,
   exerciseId,
   onSuccess,
+  onCancel,
+  showHeading = true,
 }: Props) {
   const { user } = useAuth();
 
@@ -84,10 +90,12 @@ export default function ExerciseForm({
   };
 
   return (
-    <div className="border rounded-lg p-4 bg-gray-50">
-      <h3 className="text-lg font-medium mb-4">
-        {exerciseId ? "Edit Exercise" : "Add Exercise"}
-      </h3>
+    <div className="border rounded-lg p-4">
+      {showHeading && (
+        <h3 className="text-lg font-medium mb-4">
+          {exerciseId ? "Edit Exercise" : "Add Exercise"}
+        </h3>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
@@ -97,11 +105,11 @@ export default function ExerciseForm({
           >
             Exercise Name *
           </label>
-          <input
+          <Input
             {...register("name")}
             type="text"
             id="name"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm placeholder:text-gray-400"
             placeholder="Enter exercise name"
           />
           {errors.name && (
@@ -117,7 +125,7 @@ export default function ExerciseForm({
             >
               Sets
             </label>
-            <input
+            <Input
               {...register("sets", { valueAsNumber: true })}
               type="number"
               id="sets"
@@ -137,7 +145,7 @@ export default function ExerciseForm({
             >
               Reps
             </label>
-            <input
+            <Input
               {...register("reps")}
               type="text"
               id="reps"
@@ -157,11 +165,11 @@ export default function ExerciseForm({
           >
             Notes
           </label>
-          <textarea
+          <Textarea
             {...register("notes")}
             id="notes"
             rows={3}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm "
             placeholder="Additional notes or instructions"
           />
           {errors.notes && (
@@ -169,18 +177,22 @@ export default function ExerciseForm({
           )}
         </div>
 
-        <div className="flex justify-end space-x-3">
-          <button
-            type="button"
-            onClick={() => reset()}
-            className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
-            Reset
-          </button>
+        <div className="flex justify-between space-x-3">
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              Cancel
+            </button>
+          )}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+              onCancel ? "ml-auto" : ""
+            }`}
           >
             {isSubmitting
               ? "Saving..."

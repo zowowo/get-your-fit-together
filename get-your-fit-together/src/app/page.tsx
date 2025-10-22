@@ -74,7 +74,8 @@ export default function HomePage() {
               Get Your Fit Together
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-cyan-100">
-              Track your workouts and stay consistent with your fitness journey
+              Stay motivated, track progress, and crush your fitness
+              goals—together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {user ? (

@@ -62,12 +62,6 @@ export default function FavoriteButton({
     return null;
   }
 
-  const sizeClasses = {
-    sm: "h-8 w-8",
-    md: "h-10 w-10",
-    lg: "h-12 w-12",
-  };
-
   const iconSizes = {
     sm: "h-4 w-4",
     md: "h-5 w-5",
@@ -76,15 +70,15 @@ export default function FavoriteButton({
 
   return (
     <Button
+      data-tooltip-id="favorite-tooltip"
+      data-tooltip-content="Favorite"
       variant="ghost"
-      size="sm"
+      size={showText ? "sm" : "sm"}
       onClick={handleToggle}
       disabled={loading}
-      className={`${
-        sizeClasses[size]
-      } p-0 text-slate-300 hover:text-red-400 hover:bg-slate-800 transition-colors ${
-        isFavorited ? "text-red-400" : "text-slate-300"
-      }`}
+      className={`text-slate-600 hover:text-red-500 transition-colors ${
+        isFavorited ? "text-red-500" : "text-slate-600"
+      } ${showText ? "" : "p-0"}`}
     >
       <Heart
         className={`${iconSizes[size]} transition-all ${

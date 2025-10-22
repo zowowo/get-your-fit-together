@@ -7,7 +7,6 @@ import { handleSupabaseError, handleSuccess } from "@/lib/error-handler";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Loader2, User, Mail, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,12 +14,6 @@ import { z } from "zod";
 
 const profileSchema = z.object({
   full_name: z.string().min(1, "Full name is required"),
-  bio: z.string().optional(),
-  avatar_url: z
-    .string()
-    .url("Must be a valid URL")
-    .optional()
-    .or(z.literal("")),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -28,8 +21,6 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 type Profile = {
   id: string;
   full_name: string | null;
-  bio: string | null;
-  avatar_url: string | null;
   created_at: string | null;
 };
 
@@ -67,8 +58,6 @@ export default function ProfilePage() {
         setProfile(data);
         reset({
           full_name: data?.full_name || "",
-          bio: data?.bio || "",
-          avatar_url: data?.avatar_url || "",
         });
       } catch (error) {
         handleSupabaseError(error, "Failed to load profile");
@@ -90,9 +79,6 @@ export default function ProfilePage() {
       const { error } = await supabase.from("profiles").upsert({
         id: user.id,
         full_name: data.full_name,
-        bio: data.bio || null,
-        avatar_url: data.avatar_url || null,
-        updated_at: new Date().toISOString(),
       });
 
       if (error) throw error;
@@ -180,47 +166,6 @@ export default function ProfilePage() {
             {errors.full_name && (
               <p className="text-sm text-red-600">{errors.full_name.message}</p>
             )}
-          </div>
-
-          {/* Bio */}
-          <div className="space-y-2">
-            <Label htmlFor="bio" className="text-sm font-medium text-slate-700">
-              Bio
-            </Label>
-            <Textarea
-              id="bio"
-              {...register("bio")}
-              placeholder="Tell us about yourself..."
-              rows={4}
-              className={errors.bio ? "border-red-300" : ""}
-            />
-            {errors.bio && (
-              <p className="text-sm text-red-600">{errors.bio.message}</p>
-            )}
-          </div>
-
-          {/* Avatar URL */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="avatar_url"
-              className="text-sm font-medium text-slate-700"
-            >
-              Avatar URL
-            </Label>
-            <Input
-              id="avatar_url"
-              {...register("avatar_url")}
-              placeholder="https://example.com/avatar.jpg"
-              className={errors.avatar_url ? "border-red-300" : ""}
-            />
-            {errors.avatar_url && (
-              <p className="text-sm text-red-600">
-                {errors.avatar_url.message}
-              </p>
-            )}
-            <p className="text-xs text-slate-500">
-              Enter a URL to an image for your profile picture.
-            </p>
           </div>
 
           {/* Error Message */}

@@ -32,6 +32,7 @@ export default function NewExercisePage() {
         </h1>
         <ExerciseForm
           workoutId={workoutId}
+          showHeading={false}
           onSuccess={() => {
             // Redirect back to workout details
             window.location.href = `/dashboard/workouts/${workoutId}`;

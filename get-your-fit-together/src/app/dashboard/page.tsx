@@ -18,8 +18,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Plus, Edit, Trash2, Eye, Dumbbell } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Eye, Dumbbell } from "lucide-react";
 import FavoriteButton from "@/components/FavoriteButton";
+import { Tooltip } from "react-tooltip";
 
 type Workout = {
   id: string;
@@ -130,7 +131,6 @@ export default function DashboardPage() {
           </Link>
         </Button>
       </div>
-
       {/* Workouts List */}
       {workouts.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-slate-200">
@@ -161,7 +161,12 @@ export default function DashboardPage() {
             >
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-lg font-semibold text-slate-900 line-clamp-2">
-                  {workout.title}
+                  <Link
+                    href={`/dashboard/workouts/${workout.id}`}
+                    className="hover:underline hover:text-blue-500 transition-colors"
+                  >
+                    {workout.title}
+                  </Link>
                 </h3>
                 <div className="flex items-center gap-2 ml-2">
                   <Badge
@@ -196,14 +201,20 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <FavoriteButton workoutId={workout.id} size="sm" />
-                  <Button asChild size="sm" variant="ghost">
+                  {/* <Button asChild size="sm" variant="ghost">
                     <Link href={`/dashboard/workouts/${workout.id}`}>
                       <Eye className="h-4 w-4" />
                     </Link>
-                  </Button>
-                  <Button asChild size="sm" variant="ghost">
+                  </Button> */}
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="ghost"
+                    data-tooltip-id="edit-tooltip"
+                    data-tooltip-content="Edit Workout"
+                  >
                     <Link href={`/dashboard/workouts/${workout.id}/edit`}>
-                      <Edit className="h-4 w-4" />
+                      <Pencil className="h-4 w-4" />
                     </Link>
                   </Button>
                   <DeleteButton onDelete={() => handleDelete(workout.id)} />
@@ -213,7 +224,6 @@ export default function DashboardPage() {
           ))}
         </div>
       )}
-
       {/* Quick Actions */}
       <div className="bg-white rounded-lg border border-slate-200 p-6">
         <h3 className="text-lg font-semibold text-slate-900 mb-4">
@@ -246,6 +256,9 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
+      <Tooltip id="edit-tooltip" place="top" />
+      <Tooltip id="delete-tooltip" place="top" />
+      <Tooltip id="favorite-tooltip" place="top" />
     </div>
   );
 }
@@ -266,6 +279,8 @@ function DeleteButton({ onDelete }: { onDelete: () => void }) {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button
+          data-tooltip-id="delete-tooltip"
+          data-tooltip-content="Delete Workout"
           variant="ghost"
           size="sm"
           className="text-red-600 hover:text-red-700 hover:bg-red-50"

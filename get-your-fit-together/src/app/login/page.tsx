@@ -1,20 +1,69 @@
 "use client";
 
 import { useState } from "react";
-import { FcGoogle } from "react-icons/fc";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { handleSupabaseError, handleSuccess } from "@/lib/error-handler";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Loader2, LogIn} from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { PasswordInput } from "@/components/ui/password-input";
+
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [message, setMessage] = useState("");
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
-  // GoogleAuth via oAuth
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    setLoading(true);
+    setErr(null);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (error) throw error;
+
+      handleSuccess("Logged in successfully!");
+      router.push("/");
+    } catch (error) {
+      handleSupabaseError(error, "Failed to log in");
+      setErr("Invalid email or password.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Google Login
   const handleGoogleAuth = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -22,146 +71,121 @@ export default function LoginPage() {
         redirectTo: `${window.location.origin}/`,
       },
     });
-    if (error) console.error("Error:", error.message);
-  };
-
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
-
-    try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: fullName,
-            },
-          },
-        });
-        if (error) throw error;
-        setMessage("Check your email for the confirmation link!");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        router.push("/");
-      }
-    } catch (error: unknown) {
-      const err = error as Error;
-      setMessage(err?.message ?? "An error occurred");
-    } finally {
-      setLoading(false);
-    }
+    if (error) console.error("Google login error:", error.message);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {isSignUp ? "Sign up" : "Sign in"} to your account
-          </h2>
+        {/* Header */}
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-slate-900">Welcome back</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Sign in to continue your fitness journey
+          </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleAuth}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            {isSignUp && (
-              <div>
-                <label htmlFor="full_name" className="sr-only">
-                  Full name
-                </label>
-                <input
-                  id="full_name"
-                  name="full_name"
-                  type="text"
-                  autoComplete="name"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Full name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+
+        {/* Login Form */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <LogIn className="h-5 w-5" />
+              Sign In
+            </CardTitle>
+            <CardDescription>Access your account</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...register("email")}
+                  placeholder="Enter your email"
+                  className={errors.email ? "border-red-300" : ""}
                 />
+                {errors.email && (
+                  <p className="text-sm text-red-600">{errors.email.message}</p>
+                )}
               </div>
-            )}
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className={`appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 ${
-                  isSignUp ? "" : "rounded-t-md"
-                } focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-          {message && (
-            <div
-              className={`text-sm ${
-                message.includes("error") ? "text-red-600" : "text-green-600"
-              }`}
-            >
-              {message}
-            </div>
-          )}
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-            >
-              {loading ? "Loading..." : isSignUp ? "Sign up" : "Sign in"}
-            </button>
-          </div>
 
-          <button
-            type="button"
-            onClick={handleGoogleAuth}
-            className="w-full flex justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-          >
-            <FcGoogle className="w-5 h-5" />
-            Continue with Google
-          </button>
+              {/* Password */}
+              <div className="space-y-2">
+                <Label htmlFor="password">Password *</Label>
+                <PasswordInput
+                  id="password"
+                  placeholder="Create a password"
+                  {...register("password")}
+                  className={errors.password ? "border-red-300" : ""}
+                />
+                {errors.password && (
+                  <p className="text-sm text-red-600">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
 
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-indigo-600 hover:text-indigo-500"
-            >
-              {isSignUp
-                ? "Already have an account? Sign in"
-                : "Don't have an account? Sign up"}
-            </button>
-          </div>
-        </form>
+              {/* Error Message */}
+              {err && (
+                <div className="p-4 text-red-400 bg-red-50 rounded-lg border border-red-200">
+                  {err}
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-cyan-600 hover:bg-cyan-700"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Signing In...
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign In
+                  </>
+                )}
+              </Button>
+
+              {/* Google Login */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleGoogleAuth}
+                className="w-full flex items-center justify-center gap-2 mt-2"
+              >
+                <FcGoogle className="w-5 h-5" />
+                Continue with Google
+              </Button>
+            </form>
+
+            {/* Signup Link */}
+            <div className="mt-6 text-center">
+              <p className="text-sm text-slate-600">
+                Don’t have an account?{" "}
+                <Link
+                  href="/signup"
+                  className="font-medium text-cyan-600 hover:text-cyan-500"
+                >
+                  Sign up here
+                </Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Back to Home */}
+        <div className="text-center">
+          <Link href="/" className="text-sm text-slate-600 hover:text-cyan-600">
+            ← Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   );

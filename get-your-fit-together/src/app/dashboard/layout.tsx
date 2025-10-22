@@ -3,7 +3,6 @@
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import Navigation from "@/components/Navigation";
 import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({

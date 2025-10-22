@@ -7,6 +7,8 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { handleSupabaseError, handleSuccess } from "@/lib/error-handler";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type Props = {
   initialValues?: Partial<WorkoutInput>;
@@ -87,7 +89,7 @@ export default function WorkoutForm({ initialValues, workoutId }: Props) {
         >
           Title *
         </label>
-        <input
+        <Input
           {...register("title")}
           type="text"
           id="title"
@@ -106,7 +108,7 @@ export default function WorkoutForm({ initialValues, workoutId }: Props) {
         >
           Description
         </label>
-        <textarea
+        <Textarea
           {...register("description")}
           id="description"
           rows={4}

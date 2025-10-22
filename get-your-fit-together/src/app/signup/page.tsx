@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { handleSupabaseError, handleSuccess } from "@/lib/error-handler";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,74 +13,56 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, UserPlus, Dumbbell } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-
-const signupSchema = z
-  .object({
-    email: z.string().email("Please enter a valid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string(),
-    fullName: z.string().min(1, "Full name is required"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-type SignupFormData = z.infer<typeof signupSchema>;
+import { PasswordInput } from "@/components/ui/password-input";
+import { FcGoogle } from "react-icons/fc";
 
 export default function SignupPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema),
-  });
+  // Google Login
+  const handleGoogleAuth = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/` },
+    });
+    if (error) setErr(error.message);
+  };
 
-  const onSubmit = async (data: SignupFormData) => {
-    setLoading(true);
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
     setErr(null);
 
+    if (password !== confirmPassword) {
+      setErr("Passwords do not match");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      // Sign up with Supabase
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            full_name: data.fullName,
-          },
-        },
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName } },
       });
+      if (error) throw error;
 
-      if (authError) throw authError;
-
-      // Create profile
-      if (authData.user) {
-        const { error: profileError } = await supabase.from("profiles").insert({
-          id: authData.user.id,
-          full_name: data.fullName,
-        });
-
-        if (profileError) throw profileError;
-      }
-
-      handleSuccess(
-        "Account created successfully! Please check your email to verify your account."
-      );
+      alert("Check your email for the confirmation link!");
       router.push("/login");
-    } catch (error) {
-      handleSupabaseError(error, "Failed to create account");
-      setErr("Failed to create account. Please try again.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErr(error.message);
+      } else {
+        setErr("Failed to create account");
+      }
     } finally {
       setLoading(false);
     }
@@ -90,14 +71,7 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* Header */}
         <div className="text-center">
-          {/* <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <Dumbbell className="h-8 w-8 text-cyan-600" />
-            <span className="text-2xl font-bold text-slate-900">
-              Get Your Fit Together
-            </span>
-          </Link> */}
           <h2 className="text-3xl font-bold text-slate-900">
             Create your account
           </h2>
@@ -106,7 +80,6 @@ export default function SignupPage() {
           </p>
         </div>
 
-        {/* Signup Form */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -118,80 +91,54 @@ export default function SignupPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Full Name */}
+            <form onSubmit={handleSignup} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="fullName">Full Name *</Label>
                 <Input
                   id="fullName"
-                  {...register("fullName")}
                   placeholder="Enter your full name"
-                  className={errors.fullName ? "border-red-300" : ""}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                 />
-                {errors.fullName && (
-                  <p className="text-sm text-red-600">
-                    {errors.fullName.message}
-                  </p>
-                )}
               </div>
 
-              {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address *</Label>
                 <Input
                   id="email"
                   type="email"
-                  {...register("email")}
                   placeholder="Enter your email"
-                  className={errors.email ? "border-red-300" : ""}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
-                {errors.email && (
-                  <p className="text-sm text-red-600">{errors.email.message}</p>
-                )}
               </div>
 
-              {/* Password */}
               <div className="space-y-2">
                 <Label htmlFor="password">Password *</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
-                  {...register("password")}
                   placeholder="Create a password"
-                  className={errors.password ? "border-red-300" : ""}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
-                {errors.password && (
-                  <p className="text-sm text-red-600">
-                    {errors.password.message}
-                  </p>
-                )}
               </div>
 
-              {/* Confirm Password */}
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password *</Label>
-                <Input
+                <PasswordInput
                   id="confirmPassword"
-                  type="password"
-                  {...register("confirmPassword")}
                   placeholder="Confirm your password"
-                  className={errors.confirmPassword ? "border-red-300" : ""}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
-                {errors.confirmPassword && (
-                  <p className="text-sm text-red-600">
-                    {errors.confirmPassword.message}
-                  </p>
-                )}
               </div>
 
-              {/* Error Message */}
               {err && (
                 <div className="p-4 text-red-400 bg-red-50 rounded-lg border border-red-200">
                   {err}
                 </div>
               )}
 
-              {/* Submit Button */}
               <Button
                 type="submit"
                 disabled={loading}
@@ -209,9 +156,18 @@ export default function SignupPage() {
                   </>
                 )}
               </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleGoogleAuth}
+                className="w-full flex items-center justify-center gap-2 mt-2"
+              >
+                <FcGoogle className="w-5 h-5" />
+                Continue with Google
+              </Button>
             </form>
 
-            {/* Login Link */}
             <div className="mt-6 text-center">
               <p className="text-sm text-slate-600">
                 Already have an account?{" "}
@@ -226,7 +182,6 @@ export default function SignupPage() {
           </CardContent>
         </Card>
 
-        {/* Back to Home */}
         <div className="text-center">
           <Link href="/" className="text-sm text-slate-600 hover:text-cyan-600">
             ← Back to Home

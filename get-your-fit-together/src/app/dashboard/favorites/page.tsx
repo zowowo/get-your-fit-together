@@ -7,8 +7,9 @@ import { handleSupabaseError } from "@/lib/error-handler";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Heart, Eye, Edit, Dumbbell } from "lucide-react";
+import { Loader2, Heart, Eye, Pencil, Dumbbell } from "lucide-react";
 import FavoriteButton from "@/components/FavoriteButton";
+import { Tooltip } from "react-tooltip";
 
 export default function FavoritesPage() {
   const { user } = useAuth();
@@ -67,7 +68,9 @@ export default function FavoritesPage() {
       <div className="flex items-center gap-3">
         <Heart className="h-8 w-8 text-red-400" />
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">My Favorites</h1>
+          <h1 className="text-3xl font-bold text-slate-900">
+            My Favorite Workouts
+          </h1>
           <p className="text-slate-600 mt-1">
             Workouts you&apos;ve saved for later
           </p>
@@ -82,7 +85,7 @@ export default function FavoritesPage() {
             No favorite workouts yet
           </h3>
           <p className="text-slate-500 mb-6">
-            Start favoriting workouts you like to see them here!
+            Start liking workouts to see them here!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild className="bg-cyan-600 hover:bg-cyan-700">
@@ -114,7 +117,12 @@ export default function FavoritesPage() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <h3 className="text-lg font-semibold text-slate-900 line-clamp-2">
-                    {workout.title}
+                    <Link
+                      href={`/dashboard/workouts/${workout.id}`}
+                      className="hover:underline hover:text-blue-500 transition-colors"
+                    >
+                      {workout.title}
+                    </Link>
                   </h3>
                   <div className="flex items-center gap-2 ml-2">
                     <Badge
@@ -148,29 +156,37 @@ export default function FavoritesPage() {
                   </p>
                 )}
 
-                <p className="text-xs text-slate-500 mb-4">
+                {/* <p className="text-xs text-slate-500 mb-4">
                   Favorited on{" "}
                   {new Date(workout.favorited_at).toLocaleDateString()}
-                </p>
+                </p> */}
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <FavoriteButton
                       workoutId={workout.id}
                       size="sm"
+                      data-tooltip-id="favorite-tooltip"
+                      data-tooltip-content="Favorite"
                       onToggle={(isFavorited) =>
                         handleFavoriteToggle(workout.id, isFavorited)
                       }
                     />
-                    <Button asChild size="sm" variant="ghost">
+                    {/* <Button asChild size="sm" variant="ghost">
                       <Link href={`/dashboard/workouts/${workout.id}`}>
                         <Eye className="h-4 w-4" />
                       </Link>
-                    </Button>
+                    </Button> */}
                     {mine && (
-                      <Button asChild size="sm" variant="ghost">
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="ghost"
+                        data-tooltip-id="edit-tooltip"
+                        data-tooltip-content="Edit Workout"
+                      >
                         <Link href={`/dashboard/workouts/${workout.id}/edit`}>
-                          <Edit className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
                     )}
@@ -212,6 +228,8 @@ export default function FavoritesPage() {
           </Button>
         </div>
       </div>
+      <Tooltip id="edit-tooltip" place="top" />
+      <Tooltip id="favorite-tooltip" place="top" />
     </div>
   );
 }

@@ -116,10 +116,10 @@ export default function FavoritesPage() {
                         {workout.description}
                       </p>
                     )}
-                    <p className="text-xs text-slate-500 mt-2">
+                    {/* <p className="text-xs text-slate-500 mt-2">
                       Favorited on{" "}
                       {new Date(workout.favorited_at).toLocaleDateString()}
-                    </p>
+                    </p> */}
                   </div>
                   <div className="flex items-center gap-3 ml-4">
                     <FavoriteButton

@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import ExerciseForm from "@/components/ExerciseForm";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Pencil, Trash2 } from "lucide-react";
 
 type Exercise = {
   id: string;
@@ -20,15 +27,34 @@ type Props = {
 };
 
 export default function ExerciseList({ workoutId, canEdit = false }: Props) {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [workoutOwnerId, setWorkoutOwnerId] = useState<string | null>(null);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
 
   useEffect(() => {
     const loadExercises = async () => {
       setLoading(true);
       setErr(null);
+
       try {
+        // Get current user
+        const { data: user } = await supabase.auth.getUser();
+        setUserId(user?.user?.id ?? null);
+
+        // Get workout owner
+        const { data: workoutData, error: workoutError } = await supabase
+          .from("workouts")
+          .select("owner")
+          .eq("id", workoutId)
+          .single();
+
+        if (workoutError) throw workoutError;
+        setWorkoutOwnerId(workoutData?.owner ?? null);
+
+        // Fetch exercises
         const { data, error } = await supabase
           .from("exercises")
           .select("*")
@@ -36,6 +62,7 @@ export default function ExerciseList({ workoutId, canEdit = false }: Props) {
           .order("created_at", { ascending: true });
 
         if (error) throw error;
+
         setExercises(data ?? []);
       } catch (e: unknown) {
         const error = e as Error;
@@ -44,6 +71,7 @@ export default function ExerciseList({ workoutId, canEdit = false }: Props) {
         setLoading(false);
       }
     };
+
     loadExercises();
   }, [workoutId]);
 
@@ -94,20 +122,22 @@ export default function ExerciseList({ workoutId, canEdit = false }: Props) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Exercises ({exercises.length})</h3>
-        {canEdit && (
+        {/* {canEdit && (
           <button
             onClick={handleRefresh}
             className="text-sm text-indigo-600 hover:text-indigo-700"
           >
             Refresh
           </button>
-        )}
+        )} */}
       </div>
 
       {exercises.length === 0 ? (
-        <div className="text-gray-500 text-center py-8 border rounded-lg">
-          No exercises yet. Add one below to get started!
-        </div>
+        userId === workoutOwnerId && (
+          <div className="text-gray-500 text-center py-8 border rounded-lg">
+            No exercises yet. Add one below to get started!
+          </div>
+        )
       ) : (
         <div className="space-y-3">
           {exercises.map((exercise) => (
@@ -130,16 +160,34 @@ export default function ExerciseList({ workoutId, canEdit = false }: Props) {
 
                 {canEdit && (
                   <div className="flex items-center gap-2 ml-4">
-                    <EditExerciseButton
-                      exercise={exercise}
-                      onSuccess={handleRefresh}
-                    />
-                    <button
-                      onClick={() => handleDelete(exercise.id)}
-                      className="text-red-600 hover:text-red-700 text-sm"
-                    >
-                      Delete
-                    </button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => setEditingExercise(exercise)}
+                            className="text-indigo-600 hover:text-indigo-700 p-2 rounded hover:bg-indigo-50"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit exercise</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => handleDelete(exercise.id)}
+                            className="text-red-600 hover:text-red-700 p-2 rounded hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete exercise</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 )}
               </div>
@@ -147,54 +195,60 @@ export default function ExerciseList({ workoutId, canEdit = false }: Props) {
           ))}
         </div>
       )}
-    </div>
-  );
-}
 
-// Edit button component
-function EditExerciseButton({
-  exercise,
-  onSuccess,
-}: {
-  exercise: Exercise;
-  onSuccess: () => void;
-}) {
-  const [isEditing, setIsEditing] = useState(false);
-
-  if (isEditing) {
-    return (
-      <div className="space-y-2">
-        <ExerciseForm
-          workoutId={exercise.workout_id}
-          exerciseId={exercise.id}
-          initialValues={{
-            id: exercise.id,
-            name: exercise.name,
-            sets: exercise.sets,
-            reps: exercise.reps,
-            notes: exercise.notes,
-          }}
-          onSuccess={() => {
-            setIsEditing(false);
-            onSuccess();
-          }}
-        />
-        <button
-          onClick={() => setIsEditing(false)}
-          className="text-sm text-gray-600 hover:text-gray-700"
+      {/* Edit Exercise Modal */}
+      {editingExercise && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50"
+          onClick={() => setEditingExercise(null)}
         >
-          Cancel
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      onClick={() => setIsEditing(true)}
-      className="text-indigo-600 hover:text-indigo-700 text-sm"
-    >
-      Edit
-    </button>
+          <div
+            className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900">
+                Edit {editingExercise.name}
+              </h3>
+              <button
+                onClick={() => setEditingExercise(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <ExerciseForm
+              workoutId={editingExercise.workout_id}
+              exerciseId={editingExercise.id}
+              initialValues={{
+                id: editingExercise.id,
+                name: editingExercise.name,
+                sets: editingExercise.sets,
+                reps: editingExercise.reps,
+                notes: editingExercise.notes,
+              }}
+              showHeading={false}
+              onSuccess={() => {
+                setEditingExercise(null);
+                handleRefresh();
+              }}
+              onCancel={() => setEditingExercise(null)}
+            />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

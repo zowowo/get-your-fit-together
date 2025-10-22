@@ -9,7 +9,7 @@ import ExerciseForm from "@/components/ExerciseForm";
 import FavoriteButton from "@/components/FavoriteButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, Loader2 } from "lucide-react";
+import { ArrowLeft, Edit, Loader2, Plus } from "lucide-react";
 import Link from "next/link";
 
 type Workout = {
@@ -29,6 +29,7 @@ export default function WorkoutDetailsPage() {
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!workoutId) return;
@@ -198,31 +199,61 @@ export default function WorkoutDetailsPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-slate-900">Exercises</h2>
           {canEdit && (
-            <Button asChild>
-              <Link href={`/dashboard/workouts/${workout.id}/exercises/new`}>
-                Add Exercise
-              </Link>
+            <Button onClick={() => setIsModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Exercise
             </Button>
           )}
         </div>
 
         <ExerciseList workoutId={workoutId} canEdit={canEdit} />
+      </div>
 
-        {canEdit && (
-          <div className="bg-white rounded-lg border border-slate-200 p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">
-              Add New Exercise
-            </h3>
+      {/* Add Exercise Modal */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900">
+                Add New Exercise
+              </h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
             <ExerciseForm
               workoutId={workoutId}
+              showHeading={false}
               onSuccess={() => {
+                setIsModalOpen(false);
                 // Trigger refresh of exercise list
                 window.location.reload();
               }}
             />
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
